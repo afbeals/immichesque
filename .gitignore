@@ -1,0 +1,11 @@
+immich/.env
+immich/automation.env
+immich/library/
+immich/postgres/
+
+**/__pycache__/
+*.pyc
+.pytest_cache/
+automation/.venv/
+
+.DS_Store
