@@ -1,0 +1,36 @@
+# Additions to Immich's official docker-compose.yml (vendored, untouched,
+# in this same directory). Compose merges this file in automatically for a
+# plain `docker compose up -d` run from this directory -- no -f flags needed.
+#
+# Both services below join the same Compose project ("immich", set by the
+# `name:` field in docker-compose.yml) and therefore the same Docker
+# network, so they can reach immich-server by its service name.
+
+services:
+  cloudflared:
+    container_name: media_cloudflared
+    image: docker.io/cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel run
+    env_file:
+      - automation.env
+    depends_on:
+      - immich-server
+
+  media-automation:
+    container_name: media_automation
+    build:
+      context: ../automation
+    restart: unless-stopped
+    env_file:
+      - automation.env
+    environment:
+      - IMMICH_API_URL=http://immich-server:2283/api
+      - REVIEW_STAGING_DIR=/review_staging
+      - RETENTION_DAYS=7
+    volumes:
+      - ${REVIEW_STAGING_LOCATION}:/review_staging
+    ports:
+      - '5000:5000'
+    depends_on:
+      - immich-server
